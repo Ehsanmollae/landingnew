@@ -16,7 +16,7 @@ All text, links and skills live in `src/content.js`. Edit the `fa` and `en` obje
 
 ## Cats
 
-Three flat SVG cats (black, orange, white) roam the whole page: they chase a laser dot that follows the mouse, sit on section edges and ride along while scrolling, knock skill chips off, hide in the contact "box", walk across the hero text, purr when petted, and nap when you go idle.
+Three hand-animated cats (black, orange, white; 12 four-frame animations each, built from `art/frames` by `scripts/build-frames.py`) roam the whole page: they chase a laser dot that follows the mouse, sit on section edges and ride along while scrolling, knock skill chips off, hide in the contact "box", walk across the hero text, purr when petted, and nap when you go idle.
 Behaviors and tuning: `docs/cats.md` and `src/cats/cats.config.js`. Fonts are self-hosted (no CDN).
 
 ## Deploy

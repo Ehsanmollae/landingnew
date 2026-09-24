@@ -1,0 +1,164 @@
+{
+  "size": 256,
+  "cats": {
+    "black": {
+      "anims": {
+        "crouching": {
+          "n": 4,
+          "foot": 256
+        },
+        "leaping": {
+          "n": 4,
+          "foot": 256
+        },
+        "licking": {
+          "n": 4,
+          "foot": 230
+        },
+        "pouncing": {
+          "n": 4,
+          "foot": 256
+        },
+        "reaching": {
+          "n": 4,
+          "foot": 246
+        },
+        "rolling": {
+          "n": 4,
+          "foot": 256
+        },
+        "running": {
+          "n": 4,
+          "foot": 247
+        },
+        "sitting": {
+          "n": 4,
+          "foot": 232
+        },
+        "sleeping": {
+          "n": 4,
+          "foot": 246
+        },
+        "startled": {
+          "n": 4,
+          "foot": 256
+        },
+        "stretching": {
+          "n": 4,
+          "foot": 256
+        },
+        "walking": {
+          "n": 4,
+          "foot": 247
+        }
+      },
+      "ref": 171
+    },
+    "orange": {
+      "anims": {
+        "crouching": {
+          "n": 4,
+          "foot": 208
+        },
+        "leaping": {
+          "n": 4,
+          "foot": 206
+        },
+        "licking": {
+          "n": 4,
+          "foot": 206
+        },
+        "pouncing": {
+          "n": 4,
+          "foot": 237
+        },
+        "reaching": {
+          "n": 4,
+          "foot": 214
+        },
+        "rolling": {
+          "n": 4,
+          "foot": 178
+        },
+        "running": {
+          "n": 4,
+          "foot": 183
+        },
+        "sitting": {
+          "n": 4,
+          "foot": 214
+        },
+        "sleeping": {
+          "n": 4,
+          "foot": 202
+        },
+        "startled": {
+          "n": 4,
+          "foot": 219
+        },
+        "stretching": {
+          "n": 4,
+          "foot": 212
+        },
+        "walking": {
+          "n": 4,
+          "foot": 203
+        }
+      },
+      "ref": 172
+    },
+    "white": {
+      "anims": {
+        "crouching": {
+          "n": 4,
+          "foot": 241
+        },
+        "leaping": {
+          "n": 4,
+          "foot": 256
+        },
+        "licking": {
+          "n": 4,
+          "foot": 218
+        },
+        "pouncing": {
+          "n": 4,
+          "foot": 256
+        },
+        "reaching": {
+          "n": 4,
+          "foot": 231
+        },
+        "rolling": {
+          "n": 4,
+          "foot": 240
+        },
+        "running": {
+          "n": 4,
+          "foot": 217
+        },
+        "sitting": {
+          "n": 4,
+          "foot": 230
+        },
+        "sleeping": {
+          "n": 4,
+          "foot": 226
+        },
+        "startled": {
+          "n": 4,
+          "foot": 241
+        },
+        "stretching": {
+          "n": 4,
+          "foot": 256
+        },
+        "walking": {
+          "n": 4,
+          "foot": 224
+        }
+      },
+      "ref": 172
+    }
+  }
+}

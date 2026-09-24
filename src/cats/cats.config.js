@@ -6,7 +6,7 @@ export const catsConfig = {
   sleepAfterMs: 20000, // no input for this long -> cats fall asleep one by one
   laserTimeoutMs: 2500, // laser dot fades after the mouse stops for this long
   fastScrollPx: 45, // scroll distance per frame that startles the cats
-  speed: { walk: 55, trot: 120, run: 240, zoomies: 480 },
+  speed: { walk: 70, trot: 120, run: 240, zoomies: 480 },
 
   cats: [
     {

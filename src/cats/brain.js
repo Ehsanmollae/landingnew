@@ -6,16 +6,38 @@ import { readSurfaces } from './surfaces'
 
 const TYPE_KEYS = 'fjdkfjjjfffkkd;'
 
-// Which drawn pose (public/cats/<cat>/<pose>.webp) matches the current body state
-function pickImage(pose, mood, gait) {
-  if (pose === 'loaf') return 'sleep'
-  if (pose === 'roll') return 'roll'
+// Which hand-drawn animation (public/cats/<cat>/<anim>.webp) matches the current body state
+function pickAnim(pose, mood, gait) {
+  if (pose === 'loaf') return 'sleeping'
+  if (pose === 'roll') return 'rolling'
   if (pose === 'walk') {
-    if (mood === 'crouch') return 'crouch'
-    if (mood === 'stretch') return 'stretch'
-    return gait === 'run' ? 'run' : 'walk'
+    if (mood === 'crouch') return 'crouching'
+    if (mood === 'stretch') return 'stretching'
+    return gait === 'run' ? 'running' : 'walking'
   }
-  return { swipe: 'reach', groom: 'groom', startled: 'startled', excited: 'pounceUp' }[mood] ?? 'sit'
+  return (
+    { swipe: 'reaching', groom: 'licking', startled: 'startled', excited: 'pouncing', happy: 'rolling', yawn: 'stretching' }[mood] ??
+    'sitting'
+  )
+}
+
+// How each animation's frames are played.
+//   stride: advance one frame per `stride * catSize` px walked (feet don't slide)
+//   progress: frame chosen by the engine (jump progress)
+//   seq/fps: looping frame sequence;  once: play through then hold `hold`
+const PLAYBACK = {
+  sitting: { fps: 2.5, seq: [0, 0, 0, 1, 1, 0, 0, 0, 3, 3, 0, 2, 0, 0] }, // frame 2 = blink
+  walking: { stride: 0.2 },
+  running: { stride: 0.42 },
+  crouching: { fps: 8, pingpong: true },
+  licking: { fps: 5, pingpong: true },
+  reaching: { fps: 8 },
+  rolling: { fps: 3, pingpong: true },
+  sleeping: { fps: 2.5, once: true, hold: 2 }, // curls up, then stays a ball
+  startled: { fps: 9, once: true },
+  stretching: { fps: 2.4, once: true },
+  leaping: { progress: true },
+  pouncing: { progress: true },
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +95,7 @@ const STATES = {
       d.h ??= c.world.S * 0.4 + Math.max(0, d.fromY - s.top) * 0.25
       c.facing = tx >= d.fromX ? 1 : -1
       c.set('walk', 'leap')
-      d.air = d.pounce ? 'pounceUp' : d.fromY - s.top > c.world.S * 0.5 ? 'hopAway' : 'run'
+      c.show(d.pounce ? 'pouncing' : 'leaping')
       c.squash.v = 3
     },
     update(c, dt, d) {
@@ -85,7 +107,7 @@ const STATES = {
       }
       const tx = clamp(s.rawLeft + d.toOffset, s.left, s.right)
       const p = Math.min(1, c.t / d.dur)
-      c.show(p < 0.12 || p > 0.88 ? 'crouch' : d.air)
+      c.progress = p
       c.x = lerp(d.fromX, tx, easeInOut(p))
       c.y = lerp(d.fromY, s.top, p) - d.h * 4 * p * (1 - p)
       if (p < 1) return false
@@ -155,7 +177,8 @@ const STATES = {
     },
     update(c, dt, d) {
       c.hop = -Math.sin(Math.PI * Math.min(1, c.t / 0.45)) * c.world.S * 0.22
-      if (c.t > 0.45) c.show('sit')
+      c.progress = Math.min(1, c.t / 0.55)
+      if (c.t > 0.6) c.show('sitting')
       return c.t > d.dur
     },
   },
@@ -371,9 +394,12 @@ class Cat {
     this.el = el
     this.inner = el.querySelector('.cat-inner')
     this.fx = el.querySelector('.cat-fxs')
-    this.imgs = Object.fromEntries([...el.querySelectorAll('.pose-img')].map((img) => [img.dataset.p, img]))
-    this.img = 'sit'
-    this.stride = 0
+    this.anims = Object.fromEntries([...el.querySelectorAll('.anim')].map((a) => [a.dataset.anim, a]))
+    this.anim = 'sitting'
+    this.animStart = 0
+    this.frameIndex = -1
+    this.progress = 0
+    this.stride = 0 // px walked, drives the walk/run frames
     this.gait = ''
     this.seed = Math.random() * 10
     this.world = world
@@ -413,16 +439,41 @@ class Cat {
     if (ds.mood !== mood) ds.mood = mood
     if (ds.gait !== gait) ds.gait = gait
     this.gait = gait
-    this.show(pickImage(pose, mood, gait))
+    this.show(pickAnim(pose, mood, gait))
   }
 
-  // swap the visible drawing, with a little "sticker pop"
-  show(img) {
-    if (img === this.img) return
-    this.imgs[this.img]?.classList.remove('on')
-    this.imgs[img]?.classList.add('on')
-    this.img = img
-    this.squash.v -= 2.2
+  // switch to another animation, with a little "pop"
+  show(anim) {
+    if (anim === this.anim) return
+    this.anims[this.anim]?.classList.remove('on')
+    this.anims[anim]?.classList.add('on')
+    this.anim = anim
+    this.animStart = performance.now() / 1000
+    this.progress = 0
+    this.frameIndex = -1
+    this.squash.v -= 1.2
+  }
+
+  // pick the frame of the current animation for this moment
+  updateFrame(now) {
+    const el = this.anims[this.anim]
+    if (!el) return
+    const n = Number(el.dataset.n)
+    const play = PLAYBACK[this.anim] ?? { fps: 4 }
+    const t = now - this.animStart
+    let i
+    if (play.progress) i = Math.floor(this.progress * n)
+    else if (play.stride) i = Math.floor(this.stride / (this.world.S * play.stride))
+    else if (play.seq) i = play.seq[Math.floor(t * play.fps) % play.seq.length]
+    else if (play.once) i = Math.min(play.hold ?? n - 1, Math.floor(t * play.fps))
+    else if (play.pingpong) {
+      const k = Math.floor(t * play.fps) % (2 * n - 2)
+      i = k < n ? k : 2 * n - 2 - k
+    } else i = Math.floor(t * play.fps)
+    i = ((i % n) + n) % n
+    if (i === this.frameIndex) return
+    this.frameIndex = i
+    el.style.backgroundPositionX = n > 1 ? `${(i / (n - 1)) * 100}%` : '0%'
   }
 
   go(name, data = {}) {
@@ -479,7 +530,7 @@ class Cat {
     this.facing = dx > 0 ? 1 : -1
     this.offset += Math.sign(dx) * step
     this.x += Math.sign(dx) * step
-    this.stride += (step / (this.world.S * (gait === 'run' ? 0.55 : 0.3))) * Math.PI
+    this.stride += step
     return false
   }
 
@@ -579,30 +630,22 @@ class Cat {
     const sy = this.squash.value
     const sx = 1 + (1 - sy) * 0.7
     const t = performance.now() / 1000 + this.seed
-    let bob = 0
+    this.updateFrame(performance.now() / 1000)
     let tilt = 0
     let shake = 0
     let bx = 1
     let by = 1
-    const moving = this.state !== 'jump'
-    if (this.img === 'walk' && moving) {
-      bob = Math.abs(Math.sin(this.stride)) * S * 0.035
-      tilt = Math.sin(this.stride) * 2.5
-    } else if (this.img === 'run' && moving) {
-      bob = Math.abs(Math.sin(this.stride)) * S * 0.08
-      tilt = Math.sin(this.stride) * 5
-    } else if (this.img === 'sleep') {
-      const b = Math.sin(t * 1.5) * 0.03 // slow breathing
+    if (this.anim === 'sleeping' && this.frameIndex === 2) {
+      const b = Math.sin(t * 1.5) * 0.025 // slow breathing while curled up
       by += b
       bx -= b * 0.5
-    } else if (['sit', 'groom', 'reach'].includes(this.img)) {
-      by += Math.sin(t * 2.2) * 0.012
+    } else if (this.anim === 'sitting') {
+      by += Math.sin(t * 2.2) * 0.01
     }
-    if (this.state === 'purr') tilt = Math.sin(t * 3) * 4
-    if (this.img === 'roll') tilt = Math.sin(t * 2.6) * 9
-    if (this.img === 'startled' && this.t < 0.45) shake = Math.sin(t * 70) * S * 0.025
+    if (this.state === 'purr') tilt = Math.sin(t * 3) * 3
+    if (this.anim === 'startled' && this.t < 0.45) shake = Math.sin(t * 70) * S * 0.02
     this.el.style.transform = `translate3d(${(this.x - S / 2).toFixed(1)}px, ${(this.y - S + this.sink + this.hop).toFixed(1)}px, 0)`
-    this.inner.style.transform = `translate(${shake.toFixed(1)}px, ${(-bob).toFixed(1)}px) rotate(${(tilt * this.facing).toFixed(2)}deg) scale(${(sx * bx * this.facing).toFixed(3)}, ${(sy * by).toFixed(3)})`
+    this.inner.style.transform = `translate(${shake.toFixed(1)}px, 0) rotate(${(tilt * this.facing).toFixed(2)}deg) scale(${(sx * bx * this.facing).toFixed(3)}, ${(sy * by).toFixed(3)})`
     this.el.style.setProperty('--lx', `${(this.look.x * this.facing).toFixed(2)}px`)
     this.el.style.setProperty('--ly', `${this.look.y.toFixed(2)}px`)
     const edge = this.surfaceId !== 'floor' && this.state !== 'jump' ? '1' : ''

@@ -133,20 +133,18 @@ section {
 [data-cat='white'] .cat-svg { filter: drop-shadow(0 2px 3px rgb(40 30 10 / 0.18)); }
 .dark [data-cat='black'] .cat-svg { filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.75)) drop-shadow(0 0 8px rgb(255 255 255 / 0.12)); }
 
-/* hand-drawn poses (PoseCat) */
-.pose-stack { position: absolute; inset: 0; }
-.pose-img {
+/* hand-drawn animations (FrameCat): one strip per animation */
+.anim-stack { position: absolute; inset: 0; }
+.anim {
   position: absolute;
-  max-width: none;
-  height: auto;
+  background-repeat: no-repeat;
+  background-position: 0% 0%;
   visibility: hidden;
   pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
 }
-.pose-img.on { visibility: visible; }
-[data-cat='white'] .pose-stack { filter: drop-shadow(0 2px 3px rgb(40 30 10 / 0.15)); }
-.dark [data-cat='black'] .pose-stack { filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.7)) drop-shadow(0 0 8px rgb(255 255 255 / 0.12)); }
+.anim.on { visibility: visible; }
+[data-cat='white'] .anim-stack { filter: drop-shadow(0 2px 3px rgb(40 30 10 / 0.15)); }
+.dark [data-cat='black'] .anim-stack { filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.7)) drop-shadow(0 0 8px rgb(255 255 255 / 0.12)); }
 
 /* SVG fallback poses */
 .cat .pose { display: none; }
