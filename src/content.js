@@ -34,6 +34,7 @@ export const content = {
       ],
       emailLabel: 'ایمیل:',
       copied: 'کپی شد!',
+      hint: 'موس را تکان بدهید؛ گربه‌ها نقطه قرمز را دوست دارند',
     },
     about: {
       title: 'درباره من',
@@ -71,9 +72,12 @@ export const content = {
       title: 'بیایید با هم کار کنیم',
       body: 'پروژه‌ای در ذهن دارید یا فقط می‌خواهید سلام کنید؟ خوشحال می‌شوم پیامتان را بخوانم.',
       cta: 'ارسال ایمیل',
+      fragile: 'شکستنی',
+      up: 'این طرف بالا',
     },
     footer: 'تمامی حقوق محفوظ است.',
     themeLabel: 'تغییر تم',
+    catsLabel: 'روشن/خاموش کردن گربه‌ها',
   },
   en: {
     dir: 'ltr',
@@ -94,6 +98,7 @@ export const content = {
       ],
       emailLabel: 'Reach me:',
       copied: 'Copied!',
+      hint: 'Move your mouse. The cats love the red dot.',
     },
     about: {
       title: 'About me',
@@ -131,8 +136,11 @@ export const content = {
       title: "Let's work together",
       body: 'Have a project in mind or just want to say hi? I would love to hear from you.',
       cta: 'Send an email',
+      fragile: 'Fragile',
+      up: 'This side up',
     },
     footer: 'All rights reserved.',
     themeLabel: 'Toggle theme',
+    catsLabel: 'Toggle cats',
   },
 }

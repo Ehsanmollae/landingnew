@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react'
 
 const sections = ['about', 'skills', 'projects', 'experience']
 
-export default function Navbar({ t, dark, onToggleTheme, onToggleLang }) {
+export default function Navbar({ t, dark, catsOn, onToggleTheme, onToggleLang, onToggleCats }) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -14,22 +14,22 @@ export default function Navbar({ t, dark, onToggleTheme, onToggleLang }) {
   }, [])
 
   const iconBtn =
-    'grid h-9 min-w-9 place-items-center rounded-full border border-white/40 px-2 text-sm text-white transition-opacity hover:opacity-60'
-  const bar = 'block h-[2px] w-6 bg-white transition-all duration-300'
+    'grid h-9 min-w-9 place-items-center rounded-full border border-ink/20 px-2 text-sm transition duration-150 ease-(--ease-soft) hover:bg-ink hover:text-paper dark:border-cream/25 dark:hover:bg-cream dark:hover:text-ink'
+  const bar = 'block h-[2px] w-6 bg-ink transition-all duration-300 dark:bg-cream'
 
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-10 transition-colors duration-300 ${
-          scrolled && !open ? 'bg-black/40 backdrop-blur-md' : 'bg-transparent'
+        className={`fixed inset-x-0 top-0 z-30 transition-colors duration-300 ${
+          scrolled && !open ? 'border-b border-ink/10 bg-paper/80 backdrop-blur-md dark:border-white/10 dark:bg-night/80' : 'bg-transparent'
         }`}
       >
-        <nav className="flex items-center justify-between px-5 py-4 text-white sm:px-8 sm:py-5">
+        <nav className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
           <a href="#top" className="flex items-center gap-3">
-            <span className="text-[21px] tracking-tight sm:text-[26px]" style={{ fontFamily: 'var(--font-heading)' }}>
+            <span className="font-display text-[21px] tracking-tight sm:text-[26px]">
               {t.hero.name}
             </span>
-            <span className="text-[25px] select-none sm:text-[30px]" style={{ letterSpacing: '-0.02em' }}>
+            <span className="text-[25px] text-tangerine select-none sm:text-[30px]" style={{ letterSpacing: '-0.02em' }}>
               ✳︎
             </span>
           </a>
@@ -55,6 +55,15 @@ export default function Navbar({ t, dark, onToggleTheme, onToggleLang }) {
             <button onClick={onToggleLang} className={iconBtn} aria-label="Switch language">
               {t.switchLabel}
             </button>
+            <button onClick={onToggleCats} className={`${iconBtn} ${catsOn ? '' : 'opacity-50'}`} aria-label={t.catsLabel} aria-pressed={catsOn} title={t.catsLabel}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+                <ellipse cx="12" cy="16" rx="5" ry="4.2" />
+                <ellipse cx="5.5" cy="10.5" rx="2" ry="2.6" />
+                <ellipse cx="9.5" cy="6.5" rx="2" ry="2.6" />
+                <ellipse cx="14.5" cy="6.5" rx="2" ry="2.6" />
+                <ellipse cx="18.5" cy="10.5" rx="2" ry="2.6" />
+              </svg>
+            </button>
             <button onClick={onToggleTheme} className={iconBtn} aria-label={t.themeLabel}>
               {dark ? '☀︎' : '☾'}
             </button>
@@ -73,7 +82,7 @@ export default function Navbar({ t, dark, onToggleTheme, onToggleLang }) {
       </header>
 
       <div
-        className="fixed inset-0 z-[9] flex flex-col justify-center gap-8 bg-black/90 px-8 text-white backdrop-blur-md transition-opacity duration-300 md:hidden"
+        className="fixed inset-0 z-[29] flex flex-col justify-center gap-8 bg-paper/95 px-8 backdrop-blur-md dark:bg-night/95 transition-opacity duration-300 md:hidden"
         style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none' }}
       >
         {sections.map((s) => (

@@ -8,7 +8,8 @@ export default function Skills({ t }) {
         {skills.map((s) => (
           <li
             key={s}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-center font-semibold text-slate-700 transition hover:-translate-y-1 hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-500/10 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-indigo-500"
+            data-cat-surface="chip"
+            className="rounded-2xl border border-ink/10 bg-paper px-4 py-4 text-center font-semibold transition duration-150 ease-(--ease-soft) hover:-translate-y-px hover:shadow-md dark:border-white/10 dark:bg-night"
           >
             {s}
           </li>

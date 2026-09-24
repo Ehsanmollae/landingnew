@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import CatStage from './cats/CatStage'
+import CatWorld from './cats/CatWorld'
 import { content } from './content'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -29,6 +29,7 @@ function store(key, value) {
 export default function App() {
   const [lang, setLang] = useState(() => readStored('lang', 'fa'))
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
+  const [catsOn, setCatsOn] = useState(() => readStored('cats', 'on') === 'on')
   const t = content[lang] ?? content.fa
 
   useEffect(() => {
@@ -42,6 +43,8 @@ export default function App() {
     document.documentElement.classList.toggle('dark', dark)
     store('theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  useEffect(() => store('cats', catsOn ? 'on' : 'off'), [catsOn])
 
   // Fade sections in as they scroll into view
   useEffect(() => {
@@ -62,10 +65,11 @@ export default function App() {
 
   return (
     <>
-      <CatStage mirrored={t.dir === 'rtl'} />
       <Navbar
         t={t}
         dark={dark}
+        catsOn={catsOn}
+        onToggleCats={() => setCatsOn((c) => !c)}
         onToggleTheme={() => setDark((d) => !d)}
         onToggleLang={() => setLang((l) => (l === 'fa' ? 'en' : 'fa'))}
       />
@@ -78,6 +82,7 @@ export default function App() {
         <Contact t={t.contact} />
       </main>
       <Footer name={t.hero.name} text={t.footer} />
+      {catsOn && <CatWorld />}
     </>
   )
 }

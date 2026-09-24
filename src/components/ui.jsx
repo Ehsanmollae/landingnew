@@ -1,17 +1,28 @@
-export function Section({ id, title, subtitle, children, className = '' }) {
+export function Star({ className = '' }) {
   return (
-    <section id={id} className="px-3 py-8 sm:px-6 sm:py-12">
-      {/* Glass panel: the cats stay visible in the gaps and blurred behind */}
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true">
+      <path d="M10 0 L12.4 7.6 L20 10 L12.4 12.4 L10 20 L7.6 12.4 L0 10 L7.6 7.6 Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+// A section rendered as a "shelf" panel that the cats can sit on.
+export function Section({ id, title, subtitle, children, className = '', bare = false }) {
+  return (
+    <section id={id} className="px-3 py-10 sm:px-6 sm:py-14">
       <div
-        className={`reveal mx-auto max-w-6xl rounded-3xl border border-white/20 bg-white/80 px-5 py-14 shadow-2xl backdrop-blur-xl sm:px-10 sm:py-16 dark:border-white/10 dark:bg-slate-950/75 ${className}`}
+        data-cat-surface={bare ? undefined : 'shelf'}
+        className={`reveal mx-auto max-w-6xl ${
+          bare
+            ? ''
+            : 'rounded-[28px] border border-ink/10 bg-white px-5 py-14 sm:px-10 sm:py-16 dark:border-white/10 dark:bg-shelf-dark'
+        } ${className}`}
       >
         {title && (
           <header className="mb-12 text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-              {title}
-            </h2>
-            {subtitle && <p className="mt-3 text-slate-500 dark:text-slate-400">{subtitle}</p>}
-            <span className="mx-auto mt-5 block h-1 w-14 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500" />
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">{title}</h2>
+            {subtitle && <p className="mt-3 text-ink/60 dark:text-cream/60">{subtitle}</p>}
+            <Star className="mx-auto mt-5 h-4 w-4 text-tangerine" />
           </header>
         )}
         {children}
@@ -19,7 +30,6 @@ export function Section({ id, title, subtitle, children, className = '' }) {
     </section>
   )
 }
-
 const paths = {
   github:
     'M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z',
