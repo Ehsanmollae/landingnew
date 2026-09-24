@@ -6,6 +6,18 @@ import { readSurfaces } from './surfaces'
 
 const TYPE_KEYS = 'fjdkfjjjfffkkd;'
 
+// Which drawn pose (public/cats/<cat>/<pose>.webp) matches the current body state
+function pickImage(pose, mood, gait) {
+  if (pose === 'loaf') return 'sleep'
+  if (pose === 'roll') return 'roll'
+  if (pose === 'walk') {
+    if (mood === 'crouch') return 'crouch'
+    if (mood === 'stretch') return 'stretch'
+    return gait === 'run' ? 'run' : 'walk'
+  }
+  return { swipe: 'reach', groom: 'groom', startled: 'startled', excited: 'pounceUp' }[mood] ?? 'sit'
+}
+
 // ---------------------------------------------------------------------------
 // Behaviors. enter() sets things up (it may redirect with cat.go), update()
 // returns true when the behavior is finished and the cat should pick another.
@@ -61,6 +73,7 @@ const STATES = {
       d.h ??= c.world.S * 0.4 + Math.max(0, d.fromY - s.top) * 0.25
       c.facing = tx >= d.fromX ? 1 : -1
       c.set('walk', 'leap')
+      d.air = d.pounce ? 'pounceUp' : d.fromY - s.top > c.world.S * 0.5 ? 'hopAway' : 'run'
       c.squash.v = 3
     },
     update(c, dt, d) {
@@ -72,6 +85,7 @@ const STATES = {
       }
       const tx = clamp(s.rawLeft + d.toOffset, s.left, s.right)
       const p = Math.min(1, c.t / d.dur)
+      c.show(p < 0.12 || p > 0.88 ? 'crouch' : d.air)
       c.x = lerp(d.fromX, tx, easeInOut(p))
       c.y = lerp(d.fromY, s.top, p) - d.h * 4 * p * (1 - p)
       if (p < 1) return false
@@ -119,7 +133,7 @@ const STATES = {
       if (c.t > d.dur) {
         const s = c.surface()
         const tx = clamp(L.x, s.left, s.right)
-        c.go('jump', { toId: s.id, toOffset: tx - s.rawLeft, fromX: c.x, fromY: c.y, h: c.world.S * 0.45, dur: 0.42, after: 'landPounce' })
+        c.go('jump', { toId: s.id, toOffset: tx - s.rawLeft, fromX: c.x, fromY: c.y, h: c.world.S * 0.45, dur: 0.42, pounce: true, after: 'landPounce' })
       }
       return false
     },
@@ -141,6 +155,7 @@ const STATES = {
     },
     update(c, dt, d) {
       c.hop = -Math.sin(Math.PI * Math.min(1, c.t / 0.45)) * c.world.S * 0.22
+      if (c.t > 0.45) c.show('sit')
       return c.t > d.dur
     },
   },
@@ -294,7 +309,19 @@ const STATES = {
       c.petTime += dt
       if (c.every(dt, 'heart', 0.55)) c.particle('heart')
       if (c.petTime > 3.5) return c.go('swat')
-      return c.pet < 25 && c.t > 0.8
+      if (c.pet < 25 && c.t > 0.8) return Math.random() < 0.5 ? c.go('roll') : true
+      return false
+    },
+  },
+
+  roll: {
+    enter(c, d) {
+      c.set('roll')
+      d.dur = rand(2.5, 4.5)
+    },
+    update(c, dt, d) {
+      if (c.every(dt, 'heart', 0.9)) c.particle('heart')
+      return c.t > d.dur
     },
   },
 
@@ -344,6 +371,11 @@ class Cat {
     this.el = el
     this.inner = el.querySelector('.cat-inner')
     this.fx = el.querySelector('.cat-fxs')
+    this.imgs = Object.fromEntries([...el.querySelectorAll('.pose-img')].map((img) => [img.dataset.p, img]))
+    this.img = 'sit'
+    this.stride = 0
+    this.gait = ''
+    this.seed = Math.random() * 10
     this.world = world
     this.x = 0
     this.y = 0
@@ -380,6 +412,17 @@ class Cat {
     if (ds.pose !== pose) ds.pose = pose
     if (ds.mood !== mood) ds.mood = mood
     if (ds.gait !== gait) ds.gait = gait
+    this.gait = gait
+    this.show(pickImage(pose, mood, gait))
+  }
+
+  // swap the visible drawing, with a little "sticker pop"
+  show(img) {
+    if (img === this.img) return
+    this.imgs[this.img]?.classList.remove('on')
+    this.imgs[img]?.classList.add('on')
+    this.img = img
+    this.squash.v -= 2.2
   }
 
   go(name, data = {}) {
@@ -436,6 +479,7 @@ class Cat {
     this.facing = dx > 0 ? 1 : -1
     this.offset += Math.sign(dx) * step
     this.x += Math.sign(dx) * step
+    this.stride += (step / (this.world.S * (gait === 'run' ? 0.55 : 0.3))) * Math.PI
     return false
   }
 
@@ -534,8 +578,31 @@ class Cat {
     const { S } = this.world
     const sy = this.squash.value
     const sx = 1 + (1 - sy) * 0.7
+    const t = performance.now() / 1000 + this.seed
+    let bob = 0
+    let tilt = 0
+    let shake = 0
+    let bx = 1
+    let by = 1
+    const moving = this.state !== 'jump'
+    if (this.img === 'walk' && moving) {
+      bob = Math.abs(Math.sin(this.stride)) * S * 0.035
+      tilt = Math.sin(this.stride) * 2.5
+    } else if (this.img === 'run' && moving) {
+      bob = Math.abs(Math.sin(this.stride)) * S * 0.08
+      tilt = Math.sin(this.stride) * 5
+    } else if (this.img === 'sleep') {
+      const b = Math.sin(t * 1.5) * 0.03 // slow breathing
+      by += b
+      bx -= b * 0.5
+    } else if (['sit', 'groom', 'reach'].includes(this.img)) {
+      by += Math.sin(t * 2.2) * 0.012
+    }
+    if (this.state === 'purr') tilt = Math.sin(t * 3) * 4
+    if (this.img === 'roll') tilt = Math.sin(t * 2.6) * 9
+    if (this.img === 'startled' && this.t < 0.45) shake = Math.sin(t * 70) * S * 0.025
     this.el.style.transform = `translate3d(${(this.x - S / 2).toFixed(1)}px, ${(this.y - S + this.sink + this.hop).toFixed(1)}px, 0)`
-    this.inner.style.transform = `scale(${(sx * this.facing).toFixed(3)}, ${sy.toFixed(3)})`
+    this.inner.style.transform = `translate(${shake.toFixed(1)}px, ${(-bob).toFixed(1)}px) rotate(${(tilt * this.facing).toFixed(2)}deg) scale(${(sx * bx * this.facing).toFixed(3)}, ${(sy * by).toFixed(3)})`
     this.el.style.setProperty('--lx', `${(this.look.x * this.facing).toFixed(2)}px`)
     this.el.style.setProperty('--ly', `${this.look.y.toFixed(2)}px`)
     const edge = this.surfaceId !== 'floor' && this.state !== 'jump' ? '1' : ''
