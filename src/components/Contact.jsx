@@ -3,7 +3,7 @@ import { Icon, Section } from './ui'
 
 export default function Contact({ t }) {
   return (
-    <Section id="contact">
+    <Section id="contact" className="!bg-transparent !border-0 !p-0 !shadow-none !backdrop-blur-none">
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-fuchsia-600 px-6 py-14 text-center text-white shadow-2xl sm:px-12">
         <h2 className="text-3xl font-extrabold sm:text-4xl">{t.title}</h2>
         <p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">{t.body}</p>

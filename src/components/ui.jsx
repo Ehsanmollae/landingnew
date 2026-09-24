@@ -1,7 +1,10 @@
 export function Section({ id, title, subtitle, children, className = '' }) {
   return (
-    <section id={id} className={`px-4 py-20 sm:px-6 sm:py-24 ${className}`}>
-      <div className="reveal mx-auto max-w-6xl">
+    <section id={id} className="px-3 py-8 sm:px-6 sm:py-12">
+      {/* Glass panel: the cats stay visible in the gaps and blurred behind */}
+      <div
+        className={`reveal mx-auto max-w-6xl rounded-3xl border border-white/20 bg-white/80 px-5 py-14 shadow-2xl backdrop-blur-xl sm:px-10 sm:py-16 dark:border-white/10 dark:bg-slate-950/75 ${className}`}
+      >
         {title && (
           <header className="mb-12 text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">

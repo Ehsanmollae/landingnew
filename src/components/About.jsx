@@ -2,7 +2,7 @@ import { Section } from './ui'
 
 export default function About({ t }) {
   return (
-    <Section id="about" title={t.title} className="bg-slate-50 dark:bg-slate-900/40">
+    <Section id="about" title={t.title}>
       <div className="grid items-center gap-10 md:grid-cols-[1.5fr_1fr]">
         <div className="space-y-5 text-lg leading-8 text-slate-600 dark:text-slate-300">
           {t.body.map((p, i) => (

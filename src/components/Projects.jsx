@@ -8,7 +8,7 @@ const gradients = [
 
 export default function Projects({ t }) {
   return (
-    <Section id="projects" title={t.title} subtitle={t.subtitle} className="bg-slate-50 dark:bg-slate-900/40">
+    <Section id="projects" title={t.title} subtitle={t.subtitle}>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {t.items.map((p, i) => (
           <article

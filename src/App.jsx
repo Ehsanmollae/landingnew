@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CatStage from './cats/CatStage'
 import { content } from './content'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -61,13 +62,14 @@ export default function App() {
 
   return (
     <>
+      <CatStage mirrored={t.dir === 'rtl'} />
       <Navbar
         t={t}
         dark={dark}
         onToggleTheme={() => setDark((d) => !d)}
         onToggleLang={() => setLang((l) => (l === 'fa' ? 'en' : 'fa'))}
       />
-      <main>
+      <main className="relative z-[1]">
         <Hero t={t.hero} />
         <About t={t.about} />
         <Skills t={t.skills} />
